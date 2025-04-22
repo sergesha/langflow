@@ -288,7 +288,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                         logger.warning(msg)
                         continue
 
-                return collected_results
+                return collected_results[1:]
             finally:
                 progress_task.cancel()
                 await asyncio.wait([progress_task])

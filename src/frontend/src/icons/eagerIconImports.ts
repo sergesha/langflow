@@ -110,6 +110,7 @@ import { WolframIcon } from "@/icons/Wolfram";
 import { XAIIcon } from "@/icons/xAI";
 import { YouTubeSvgIcon as YouTubeIcon } from "@/icons/Youtube";
 import { ZepMemoryIcon } from "@/icons/ZepMemory";
+import { EpamIcon } from "./Epam";
 
 // Export the eagerly loaded icons map
 export const eagerIconsMapping = {
@@ -225,4 +226,5 @@ export const eagerIconsMapping = {
   xAI: XAIIcon,
   YouTube: YouTubeIcon,
   ZepMemory: ZepMemoryIcon,
+  Epam: EpamIcon,
 };
