@@ -302,7 +302,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                     error_msg = f"Error Executing the {flow.name} tool. Error: {e!s}"
                     collected_results.append(types.TextContent(type="text", text=error_msg))
 
-                return collected_results
+                return collected_results[1:]
             finally:
                 if progress_task:
                     progress_task.cancel()
