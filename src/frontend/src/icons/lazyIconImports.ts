@@ -299,4 +299,6 @@ export const lazyIconsMapping = {
     import("@/icons/Youtube").then((mod) => ({ default: mod.YouTubeSvgIcon })),
   ZepMemory: () =>
     import("@/icons/ZepMemory").then((mod) => ({ default: mod.ZepMemoryIcon })),
+  Epam: () =>
+      import("@/icons/Epam").then((mod) => ({ default: mod.EpamIcon })),
 };

@@ -229,6 +229,7 @@ export const SIDEBAR_CATEGORIES = [
 ];
 
 export const SIDEBAR_BUNDLES = [
+  { display_name: "Epam", name: "epam", icon: "Epam" },
   { display_name: "Outlook", name: "outlook", icon: "Outlook" },
   {
     display_name: "Language Models",
