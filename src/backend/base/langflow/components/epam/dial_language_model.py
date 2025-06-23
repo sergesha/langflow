@@ -1,14 +1,13 @@
+import asyncio
+
+import aiohttp
 from langchain_openai import AzureChatOpenAI
 
 from langflow.base.models.model import LCModelComponent
 from langflow.field_typing import LanguageModel
 from langflow.field_typing.range_spec import RangeSpec
 from langflow.inputs import MessageTextInput
-from langflow.io import DropdownInput, IntInput, SecretStrInput, SliderInput, BoolInput
-
-import aiohttp
-import asyncio
-from typing import List
+from langflow.io import BoolInput, DropdownInput, IntInput, SecretStrInput, SliderInput
 
 
 class DialLanguageModelComponent(LCModelComponent):
@@ -25,9 +24,7 @@ class DialLanguageModelComponent(LCModelComponent):
         "gpt-4o",
     ]
 
-    AZURE_OPENAI_API_VERSIONS = [
-        "2024-02-01"
-    ]
+    AZURE_OPENAI_API_VERSIONS = ["2024-08-01-preview", "2024-02-01"]
 
     # Class variables to cache model list
     _models_fetched = False
@@ -103,7 +100,7 @@ class DialLanguageModelComponent(LCModelComponent):
         api_version = self.api_version
 
         try:
-            output = AzureChatOpenAI(
+            return AzureChatOpenAI(
                 azure_endpoint=azure_endpoint,
                 azure_deployment=azure_deployment,
                 api_version=api_version,
@@ -113,10 +110,9 @@ class DialLanguageModelComponent(LCModelComponent):
                 max_tokens=max_tokens or None,
             )
 
-            return output
-
         except Exception as e:
-            raise ValueError(f"Could not initialize DIAL API client: {e}")
+            msg = f"Could not initialize DIAL API client: {e}"
+            raise ValueError(msg)
 
     def update_build_config(self, build_config, field_value, field_name=None):
         """Update build configuration when input fields change."""
@@ -128,11 +124,14 @@ class DialLanguageModelComponent(LCModelComponent):
                 build_config["model_name"] = {
                     **build_config.get("model_name", {}),
                     "options": models,
-                    "value": models[0] if not hasattr(self, "model_name") or self.model_name not in models else self.model_name,
+                    "value": models[0]
+                    if not hasattr(self, "model_name") or self.model_name not in models
+                    else self.model_name,
                 }
 
             except Exception:
                 import traceback
+
                 traceback.print_exc()
 
         return build_config
@@ -159,30 +158,30 @@ class DialLanguageModelComponent(LCModelComponent):
             self.__class__._models_fetched = True
 
             return models
-        except Exception as e:
+        except Exception:
             # If refresh fails, return fallback models
-            print(f"Error refreshing models: {e}")
             return self.FALLBACK_MODELS
 
-    async def fetch_models(self) -> List[str]:
+    async def fetch_models(self) -> list[str]:
         """Fetch available models from the DIAL API."""
         # Skip API call if we don't have required credentials
-        if not hasattr(self, "dial_api_host") or not self.dial_api_host or not hasattr(self, "dial_api_key") or not self.dial_api_key:
+        if (
+            not hasattr(self, "dial_api_host")
+            or not self.dial_api_host
+            or not hasattr(self, "dial_api_key")
+            or not self.dial_api_key
+        ):
             return self.FALLBACK_MODELS
 
-        api_host = self.dial_api_host.rstrip('/')
+        api_host = self.dial_api_host.rstrip("/")
         models_url = f"{api_host}/openai/deployments?api-version={self.api_version}"
 
-        headers = {
-            "Content-Type": "application/json",
-            "Api-Key": self.dial_api_key
-        }
+        headers = {"Content-Type": "application/json", "Api-Key": self.dial_api_key}
 
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(models_url, headers=headers, timeout=10) as response:
                     if response.status != 200:
-                        print(f"Failed to fetch models: {response.status}")
                         return self.FALLBACK_MODELS
 
                     data = await response.json()
@@ -194,10 +193,8 @@ class DialLanguageModelComponent(LCModelComponent):
                         self.__class__._available_models = models
                         self.__class__._models_fetched = True
                         return models
-                    else:
-                        # If no models found, return fallback but don't mark as fetched successfully
-                        return self.FALLBACK_MODELS
-        except Exception as e:
+                    # If no models found, return fallback but don't mark as fetched successfully
+                    return self.FALLBACK_MODELS
+        except Exception:
             # On error, return fallback models
-            print(f"Exception during model fetch: {e}")
             return self.FALLBACK_MODELS
